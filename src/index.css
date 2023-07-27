@@ -1,0 +1,105 @@
+:root {
+  --primary-white : #fff;
+  --primary-grey : #232323;
+  --primary-dark : rgba (255,255,255,0);
+}
+
+body {
+  margin: 0px;
+  padding: 0px;
+  margin-bottom: 40px; /* Margin bottom by footer height */
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+/********************************** NAVBAR **************************************/
+
+nav.navbar {
+  width: 100%;
+  margin: 0px;
+}
+
+/*-------------------------------MENU LINKS-------------------------------------*/
+nav a.nav-link {
+  letter-spacing: 0.6px;
+  cursor: pointer;
+}
+
+
+
+.navbar-nav > li > a {
+  margin-right: 12px;
+  margin-left: 12px;
+  *color: var(--primary-white) !important;
+  border-top: 3px solid var(--primary-dark);
+  position: relative;
+}
+
+.navbar-brand{
+  max-width: 10px;
+  padding: 0;
+}
+
+.navbar-nav > li > a.active, .navbar-nav > li > a.active:focus{
+  border-top: 3px solid var(--primary-grey);
+}
+
+.navbar-nav > li > a:hover {
+  border-top: 3px solid var(--primary-grey);
+}
+
+.navbar-nav > li > a:hover::after {
+  content: attr(data-description);
+  position: absolute;
+  top: 40px; /* Adjust the position of the tooltip */
+  left: 0;
+  width: 100%;
+  text-align: center;
+  background-color: #232323;
+  color: #fff;
+  padding: 2px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.navbar-nav > li > a::after {
+  content: attr(data-description);
+  position: absolute;
+  top: 40px; /* Adjust the position of the tooltip */
+  left: 0;
+  width: 100%;
+  text-align: center;
+  background-color: #232323;
+  color: #fff;
+  padding: 2px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0; 
+  visibility: hidden;
+}
+
+.nav-link {
+  position: relative;
+}
+
+.description {
+  position: absolute;
+  bottom: 20px; /* Adjust this value to control the distance between the link and the description */
+  left: 0;
+  display: none;
+  padding: 8px;
+  background-color: #232323;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.nav-link:hover .description {
+  display: block;
+}
+
