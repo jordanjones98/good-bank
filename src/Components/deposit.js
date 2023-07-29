@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
+import { format } from "date-fns";
 
 const Deposit = () => {
   const userContext = useContext(UserContext);
@@ -16,28 +17,47 @@ const Deposit = () => {
   } else {
     /* eslint-disable */
     var [depositAmount, setDepositAmount] = useState("");
-    var [displayedBalance, setBalance] = useState(user.balance);
-    var balance = user.balance;
+    var [balance, setBalance] = useState(user.balance);
     var [successMessage, setSuccessMessage] = useState("");
     var [errorMessage, setErrorMessage] = useState("");
     /* eslint-enable */
 
     const handleDeposit = () => {
+      setErrorMessage("");
+      setSuccessMessage("");
       if (depositAmount === "") {
         setErrorMessage("Enter deposit amount");
+        return;
       } else if (isNaN(depositAmount)) {
         setErrorMessage("Enter valid number");
+        return;
       } else if (parseFloat(depositAmount) <= 0) {
         setErrorMessage("Negative Deposit");
-      } else {
-        const newBalance = balance + parseFloat(depositAmount);
-        setBalance(newBalance);
-        user.balance = newBalance;
-        userContext.updateUser(user);
-        setSuccessMessage(`Deposit of $${depositAmount} was successful`);
-        setDepositAmount("");
-        setErrorMessage("");
+        return;
       }
+
+      const amount = parseFloat(depositAmount);
+      const parsedBalance = parseFloat(balance);
+      const newBalance = parseFloat(parsedBalance + amount).toFixed(2);
+
+      setBalance(newBalance);
+
+      user.balance = newBalance;
+
+      if (!user.deposits) {
+        user.deposits = [];
+      }
+
+      user.deposits.push({
+        date: format(new Date(), "MM/dd/yyyy 'at' h:m a"),
+        amount,
+        balance: newBalance,
+      });
+
+      userContext.updateUser(user);
+
+      setSuccessMessage(`Deposit of $${amount} was successful`);
+      setDepositAmount("");
     };
 
     return (
@@ -69,7 +89,7 @@ const Deposit = () => {
                       type="text"
                       className="form-control"
                       id="balance"
-                      value={`$${displayedBalance}`}
+                      value={`$${balance}`}
                       readOnly
                     />
                   </div>
@@ -91,6 +111,37 @@ const Deposit = () => {
                   >
                     Deposit
                   </button>
+
+                  {user.deposits && user.deposits.length > 0 && (
+                    <div className="mt-4 mx-1">
+                      <h4
+                        className="text-center"
+                        style={{ textDecoration: "underline" }}
+                      >
+                        Deposit Log
+                      </h4>
+                      <table className="table table-striped">
+                        <thead>
+                          <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col" className="text-end">
+                              Amount
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {user.deposits.map((deposit, key) => {
+                            return (
+                              <tr key={key}>
+                                <td>{deposit.date}</td>
+                                <td className="text-end">${deposit.amount}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

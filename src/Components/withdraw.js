@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
+import { format } from "date-fns";
 
 const Withdraw = () => {
   const userContext = useContext(UserContext);
@@ -23,23 +24,38 @@ const Withdraw = () => {
     /* eslint-enable */
 
     const handleWithdraw = () => {
+      setErrorMessage("");
+      setSuccessMessage("");
+
       if (withdrawAmount === "") {
         setErrorMessage("Enter withdrawal amount");
+        return;
       } else if (isNaN(withdrawAmount)) {
         setErrorMessage("Enter valid number");
+        return;
       } else if (parseFloat(withdrawAmount) > balance) {
         setErrorMessage("Withdrawal exceeds current balance");
-      } else {
-        const newBalance = balance - parseFloat(withdrawAmount);
-        setBalance(newBalance);
-        user.balance = newBalance;
-        userContext.updateUser(user);
-        setSuccessMessage(
-          `Withdrawal of $${withdrawAmount} processed successfully.`
-        );
-        setWithdrawAmount("");
-        setErrorMessage("");
+        return;
       }
+
+      const amount = parseFloat(withdrawAmount).toFixed(2);
+      const newBalance = parseFloat(balance - amount).toFixed(2);
+      setBalance(newBalance);
+      user.balance = newBalance;
+
+      if (!user.withdraws) {
+        user.withdraws = [];
+      }
+
+      user.withdraws.push({
+        date: format(new Date(), "MM/dd/yyyy 'at' h:m a"),
+        amount,
+        balance: newBalance,
+      });
+
+      userContext.updateUser(user);
+      setSuccessMessage(`Withdrawal of $${amount} processed successfully.`);
+      setWithdrawAmount("");
     };
 
     return (
@@ -93,6 +109,37 @@ const Withdraw = () => {
                   >
                     Withdraw
                   </button>
+
+                  {user.withdraws && user.withdraws.length > 0 && (
+                    <div className="mt-4 mx-1">
+                      <h4
+                        className="text-center"
+                        style={{ textDecoration: "underline" }}
+                      >
+                        Withdraw Log
+                      </h4>
+                      <table className="table table-striped">
+                        <thead>
+                          <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col" className="text-end">
+                              Amount
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {user.withdraws.map((withdraw, key) => {
+                            return (
+                              <tr key={key}>
+                                <td>{withdraw.date}</td>
+                                <td className="text-end">${withdraw.amount}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

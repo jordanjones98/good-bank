@@ -15,6 +15,7 @@ export const UserContextProvider = ({ children }) => {
     try {
       const userDoc = doc(db, "users", user.authUid);
       await setDoc(userDoc, user);
+
       setUser(user);
     } catch (e) {
       console.error("Error adding document: ", e);
