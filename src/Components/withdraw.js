@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
 import { format } from "date-fns";
+import { prettyNumber } from "../Utilities/prettyNumber";
 
 const Withdraw = () => {
   const userContext = useContext(UserContext);
@@ -53,7 +54,9 @@ const Withdraw = () => {
       });
 
       userContext.updateUser(user);
-      setSuccessMessage(`Withdrawal of $${amount} processed successfully.`);
+      setSuccessMessage(
+        `Withdrawal of $${prettyNumber(amount)} processed successfully.`
+      );
       setWithdrawAmount("");
     };
 
@@ -86,7 +89,7 @@ const Withdraw = () => {
                       type="text"
                       className="form-control"
                       id="balance"
-                      value={`$${balance}`}
+                      value={`$${prettyNumber(balance)}`}
                       readOnly
                     />
                   </div>
@@ -131,7 +134,9 @@ const Withdraw = () => {
                             return (
                               <tr key={key}>
                                 <td>{withdraw.date}</td>
-                                <td className="text-end">${withdraw.amount}</td>
+                                <td className="text-end">
+                                  ${prettyNumber(withdraw.amount)}
+                                </td>
                               </tr>
                             );
                           })}

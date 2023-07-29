@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
 import { format } from "date-fns";
+import { prettyNumber } from "../Utilities/prettyNumber";
 
 const Deposit = () => {
   const userContext = useContext(UserContext);
@@ -56,7 +57,7 @@ const Deposit = () => {
 
       userContext.updateUser(user);
 
-      setSuccessMessage(`Deposit of $${amount} was successful`);
+      setSuccessMessage(`Deposit of $${prettyNumber(amount)} was successful`);
       setDepositAmount("");
     };
 
@@ -89,7 +90,7 @@ const Deposit = () => {
                       type="text"
                       className="form-control"
                       id="balance"
-                      value={`$${balance}`}
+                      value={`$${prettyNumber(balance)}`}
                       readOnly
                     />
                   </div>
@@ -134,7 +135,9 @@ const Deposit = () => {
                             return (
                               <tr key={key}>
                                 <td>{deposit.date}</td>
-                                <td className="text-end">${deposit.amount}</td>
+                                <td className="text-end">
+                                  ${prettyNumber(deposit.amount)}
+                                </td>
                               </tr>
                             );
                           })}
