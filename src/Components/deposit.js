@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import Structure from "./structure";
-import { setUser, UserContext } from "../Context/UserContext";
+import { UserContext } from "../Context/UserContext";
 
 const Deposit = () => {
   const userContext = useContext(UserContext);
@@ -32,8 +32,8 @@ const Deposit = () => {
       } else {
         const newBalance = balance + parseFloat(depositAmount);
         setBalance(newBalance);
-        balance = newBalance;
-        user.balance = balance;
+        user.balance = newBalance;
+        userContext.updateUser(user);
         setSuccessMessage(`Deposit of $${depositAmount} was successful`);
         setDepositAmount("");
         setErrorMessage("");
@@ -63,7 +63,7 @@ const Deposit = () => {
                       {errorMessage}
                     </div>
                   )}
-                  <div className="form-group">
+                  <div className="form-group mb-2">
                     <label htmlFor="balance">Balance</label>
                     <input
                       type="text"
@@ -73,7 +73,7 @@ const Deposit = () => {
                       readOnly
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="form-group mb-2">
                     <label htmlFor="depositAmount">Deposit Amount</label>
                     <input
                       type="number"

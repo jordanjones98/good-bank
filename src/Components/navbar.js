@@ -91,7 +91,14 @@ function NavBar() {
               );
             })}
           </ul>
-          {user?.name && <span class="ms-auto navbar-text">{user.name}</span>}
+          {user && <span className="ms-auto navbar-text">{user.name}</span>}
+          {!user && (
+            <li className="ms-auto">
+              <NavLink to="login" className="nav-link" data-description="Login">
+                Login
+              </NavLink>
+            </li>
+          )}
         </div>
       </div>
     </nav>

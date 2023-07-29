@@ -1,21 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Structure from "./structure";
+import { UserContext } from "../Context/UserContext";
 
 const Withdraw = () => {
-  if(localStorage.getItem("currentUser") === null) {
+  const userContext = useContext(UserContext);
+  const user = userContext.user;
+  if (!user) {
     return (
       <div className="container">
-        <h2 className="text-center mt-5 mb-3">Create an account before using system</h2>
+        <h2 className="text-center mt-5 mb-3">
+          Create an account before using system
+        </h2>
       </div>
-    )
-  }
-  else {
+    );
+  } else {
     /* eslint-disable */
-    var currentUser = localStorage.getItem("currentUser");
-    var user = JSON.parse(localStorage.getItem(currentUser));
     const [withdrawAmount, setWithdrawAmount] = useState("");
     var [displayedBalance, setBalance] = useState(user.balance);
-    var balance = user.balance
+    var balance = user.balance;
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     /* eslint-enable */
@@ -30,12 +32,11 @@ const Withdraw = () => {
       } else {
         const newBalance = balance - parseFloat(withdrawAmount);
         setBalance(newBalance);
-        balance = newBalance;
-        var name = user.name
-        var email = user.email
-        var password = user.password
-        localStorage.setItem(currentUser, JSON.stringify({name, email, password, balance}));
-        setSuccessMessage(`Withdrawal of $${withdrawAmount} processed successfully.`);
+        user.balance = newBalance;
+        userContext.updateUser(user);
+        setSuccessMessage(
+          `Withdrawal of $${withdrawAmount} processed successfully.`
+        );
         setWithdrawAmount("");
         setErrorMessage("");
       }
@@ -48,7 +49,12 @@ const Withdraw = () => {
             <div className="col-md-6">
               <div className="card">
                 <div className="card-body">
-                  <h4 className="card-title text-center" style={{ textDecoration: "underline" }}>Withdrawals</h4>
+                  <h4
+                    className="card-title text-center"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    Withdrawals
+                  </h4>
                   {successMessage && (
                     <div className="alert alert-success" role="alert">
                       {successMessage}
@@ -59,7 +65,7 @@ const Withdraw = () => {
                       {errorMessage}
                     </div>
                   )}
-                  <div className="form-group">
+                  <div className="form-group mb-2">
                     <label htmlFor="balance">Balance</label>
                     <input
                       type="text"
@@ -69,7 +75,7 @@ const Withdraw = () => {
                       readOnly
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="form-group mb-2">
                     <label htmlFor="withdrawAmount">Withdraw Amount</label>
                     <input
                       type="number"
@@ -94,7 +100,7 @@ const Withdraw = () => {
         </div>
       </Structure>
     );
-  };
+  }
 };
 
 export default Withdraw;

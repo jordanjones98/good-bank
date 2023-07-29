@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 const CreateAccount = () => {
   const [name, setName] = useState("");
@@ -22,7 +23,7 @@ const CreateAccount = () => {
     setPassword(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!name) {
       alert("Please enter your name.");
@@ -38,8 +39,32 @@ const CreateAccount = () => {
         email,
         balance,
       };
-      userContext.setUser(user);
+
+      try {
+        const authUser = await saveUserInStore(email, password);
+
+        localStorage.setItem("user-token", authUser.accessToken);
+
+        user.authUid = authUser.uid;
+        userContext.updateUser(user);
+      } catch (error) {
+        setSuccess(false);
+        console.log(error);
+        alert("Error creating account");
+      }
+
       setSuccess(true);
+    }
+  };
+
+  const saveUserInStore = async (email, password) => {
+    const auth = getAuth();
+    try {
+      const user = await createUserWithEmailAndPassword(auth, email, password);
+      return user.user;
+    } catch (error) {
+      console.log("Error creating user", error.code, error.message);
+      throw error;
     }
   };
 
