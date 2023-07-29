@@ -17,8 +17,7 @@ const Withdraw = () => {
   } else {
     /* eslint-disable */
     const [withdrawAmount, setWithdrawAmount] = useState("");
-    var [displayedBalance, setBalance] = useState(user.balance);
-    var balance = user.balance;
+    var [balance, setBalance] = useState(user.balance);
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     /* eslint-enable */
@@ -87,7 +86,7 @@ const Withdraw = () => {
                       type="text"
                       className="form-control"
                       id="balance"
-                      value={`$${displayedBalance}`}
+                      value={`$${balance}`}
                       readOnly
                     />
                   </div>
