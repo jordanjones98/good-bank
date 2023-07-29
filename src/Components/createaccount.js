@@ -43,9 +43,8 @@ const CreateAccount = () => {
       try {
         const authUser = await saveUserInStore(email, password);
 
-        localStorage.setItem("user-token", authUser.accessToken);
-
         user.authUid = authUser.uid;
+        userContext.createUserSession(authUser.accessToken);
         userContext.updateUser(user);
       } catch (error) {
         setSuccess(false);

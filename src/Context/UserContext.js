@@ -1,10 +1,15 @@
 import React, { useState, useContext } from "react";
 import { FirebaseContext } from "./FirebaseContext";
-import { setDoc, doc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { addHours, isBefore } from "date-fns";
 
 export var user = null;
 
 export const UserContext = React.createContext();
+const USER_TOKEN_NAME = "user-token";
+const EXPIRE_DATE_NAME = "expire-date";
+const SESSION_COLLECTION_NAME = "sessions";
+const SESSION_LENGTH_HOURS = 6;
 
 export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState();
@@ -22,8 +27,66 @@ export const UserContextProvider = ({ children }) => {
     }
   }
 
+  const createUserSession = async (uid, token) => {
+    const expireAt = addHours(new Date(), SESSION_LENGTH_HOURS).toISOString();
+
+    localStorage.setItem(USER_TOKEN_NAME, token);
+    localStorage.setItem(EXPIRE_DATE_NAME, expireAt);
+
+    try {
+      const sessionDoc = doc(db, SESSION_COLLECTION_NAME, token);
+
+      await setDoc(sessionDoc, { uid, expireAt });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const isExpired = (expireDate) => {
+    return isBefore(new Date(expireDate), new Date());
+  };
+
+  const getUserFromSession = async () => {
+    const token = localStorage.getItem(USER_TOKEN_NAME);
+    const expire = localStorage.getItem(EXPIRE_DATE_NAME);
+
+    if (expire && isExpired(expire)) {
+      console.log("Token Expired");
+      return false;
+    }
+
+    const sessionDocRef = doc(db, SESSION_COLLECTION_NAME, token);
+    const sessionDocSnap = await getDoc(sessionDocRef);
+
+    if (!sessionDocSnap.exists()) {
+      console.log("Token not found");
+      return false;
+    }
+
+    const data = sessionDocSnap.data();
+
+    if (isExpired(data.expireAt)) {
+      return false;
+    }
+
+    const userDocRef = doc(db, "users", data.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+      console.log("user not found");
+      return false;
+    }
+
+    const user = userDocSnap.data();
+    setUser(user);
+    return user;
+  };
+
   return (
-    <UserContext.Provider value={{ user, updateUser }}>
+    <UserContext.Provider
+      value={{ user, updateUser, getUserFromSession, createUserSession }}
+    >
       {children}
     </UserContext.Provider>
   );

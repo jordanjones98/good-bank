@@ -13,31 +13,25 @@ function NavBar() {
       {
         name: "Home",
         url: "/",
-        description: "Click here to return Home",
-        tooltip: "description",
-      },
-      {
-        name: "Create Account",
-        url: "/createaccount",
-        description: "Click here to create a new account",
+        description: "Return Home",
         tooltip: "description",
       },
       {
         name: "Deposit",
         url: "/deposit",
-        description: "Click here to make a deposit",
+        description: "Make a deposit",
         tooltip: "description",
       },
       {
         name: "Withdraw",
         url: "/withdraw",
-        description: "Click here to make a withdrawal",
+        description: "Make a withdrawal",
         tooltip: "description",
       },
       {
         name: "All Data",
         url: "/alldata",
-        description: "Click here to view all data",
+        description: "View all data",
         tooltip: "description",
       },
     ],
@@ -91,14 +85,31 @@ function NavBar() {
               );
             })}
           </ul>
-          {user && <span className="ms-auto navbar-text">{user.name}</span>}
-          {!user && (
-            <li className="ms-auto">
-              <NavLink to="login" className="nav-link" data-description="Login">
-                Login
-              </NavLink>
-            </li>
-          )}
+          <ul className="navbar-nav ms-auto">
+            {user && <span className="navbar-text">{user.name}</span>}
+            {!user && (
+              <>
+                <li className="nav-item ms-auto">
+                  <NavLink
+                    to="login"
+                    className="nav-link"
+                    data-description="Login"
+                  >
+                    Login
+                  </NavLink>
+                </li>
+                <li className="nav-item ms-auto">
+                  <NavLink
+                    to="createaccount"
+                    className="nav-link"
+                    data-description="Create Account"
+                  >
+                    Create Account
+                  </NavLink>
+                </li>
+              </>
+            )}
+          </ul>
         </div>
       </div>
     </nav>

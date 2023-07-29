@@ -50,7 +50,7 @@ const Deposit = () => {
       }
 
       user.deposits.push({
-        date: format(new Date(), "MM/dd/yyyy 'at' h:m a"),
+        date: format(new Date(), "MM/dd/yyyy 'at' h:mm a"),
         amount: amount.toFixed(2),
         balance: newBalance,
       });

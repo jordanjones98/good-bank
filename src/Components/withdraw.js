@@ -48,7 +48,7 @@ const Withdraw = () => {
       }
 
       user.withdraws.push({
-        date: format(new Date(), "MM/dd/yyyy 'at' h:m a"),
+        date: format(new Date(), "MM/dd/yyyy 'at' h:mm a"),
         amount,
         balance: newBalance,
       });

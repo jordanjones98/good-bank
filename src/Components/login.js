@@ -30,7 +30,7 @@ const Login = () => {
       try {
         const authUser = await login(email, password);
 
-        localStorage.setItem("user-token", authUser.accessToken);
+        await userContext.createUserSession(authUser.uid, authUser.accessToken);
 
         // user.uid = authUser.uid;
         const dbUser = await getDbUser(authUser.uid);
