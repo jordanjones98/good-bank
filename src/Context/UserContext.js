@@ -13,6 +13,7 @@ const SESSION_LENGTH_HOURS = 6;
 
 export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState();
+  const [isLoading, setIsLoading] = useState(true);
   const firebaseContext = useContext(FirebaseContext);
   const db = firebaseContext.db;
 
@@ -49,6 +50,7 @@ export const UserContextProvider = ({ children }) => {
 
     const user = userDocSnap.data();
     setUser(user);
+    setIsLoading(false);
     return user;
   }, [db]);
 
@@ -94,10 +96,27 @@ export const UserContextProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider
-      value={{ user, updateUser, getUserFromSession, createUserSession }}
-    >
-      {children}
-    </UserContext.Provider>
+    <>
+      {!isLoading ? (
+        <UserContext.Provider
+          value={{ user, updateUser, getUserFromSession, createUserSession }}
+        >
+          {children}
+        </UserContext.Provider>
+      ) : (
+        <>
+          <div className="container">
+            <div className="row mt-5 text-center">
+              <h1>Loading</h1>
+            </div>
+            <div className="row mt-2">
+              <div className="text-center">
+                <div class="spinner-border" role="status"></div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 };
