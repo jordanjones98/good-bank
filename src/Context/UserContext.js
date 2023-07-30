@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { FirebaseContext } from "./FirebaseContext";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { addHours, isBefore } from "date-fns";
@@ -16,7 +16,7 @@ export const UserContextProvider = ({ children }) => {
   const firebaseContext = useContext(FirebaseContext);
   const db = firebaseContext.db;
 
-  const getUserFromSession = async () => {
+  const getUserFromSession = useCallback(async () => {
     const token = localStorage.getItem(USER_TOKEN_NAME);
     const expire = localStorage.getItem(EXPIRE_DATE_NAME);
 
@@ -50,7 +50,7 @@ export const UserContextProvider = ({ children }) => {
     const user = userDocSnap.data();
     setUser(user);
     return user;
-  };
+  }, [db]);
 
   useEffect(() => {
     const getUser = async () => {

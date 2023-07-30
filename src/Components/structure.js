@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 
 const Structure = ({ children }) => {
   return <div className="container">{children}</div>;

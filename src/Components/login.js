@@ -34,7 +34,6 @@ const Login = () => {
 
         // user.uid = authUser.uid;
         const dbUser = await getDbUser(authUser.uid);
-        console.log(dbUser);
         userContext.updateUser(dbUser);
       } catch (error) {
         console.log(error);

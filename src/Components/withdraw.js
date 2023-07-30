@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
 import { format } from "date-fns";
+import TransactionTable from "./transactiontable";
 import { prettyNumber } from "../Utilities/prettyNumber";
 
 const Withdraw = () => {
@@ -112,38 +113,10 @@ const Withdraw = () => {
                     Withdraw
                   </button>
 
-                  {user.withdraws && user.withdraws.length > 0 && (
-                    <div className="mt-4 mx-1">
-                      <h4
-                        className="text-center"
-                        style={{ textDecoration: "underline" }}
-                      >
-                        Withdraw Log
-                      </h4>
-                      <table className="table table-striped">
-                        <thead>
-                          <tr>
-                            <th scope="col">Date</th>
-                            <th scope="col" className="text-end">
-                              Amount
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {user.withdraws.map((withdraw, key) => {
-                            return (
-                              <tr key={key}>
-                                <td>{withdraw.date}</td>
-                                <td className="text-end">
-                                  ${prettyNumber(withdraw.amount)}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                  <TransactionTable
+                    transactions={user.withdraws}
+                    title="Withdraw Log"
+                  />
                 </div>
               </div>
             </div>
