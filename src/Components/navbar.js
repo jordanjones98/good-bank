@@ -29,7 +29,7 @@ function NavBar() {
         tooltip: "description",
       },
       {
-        name: "All Data",
+        name: "All Data BROKEN",
         url: "/alldata",
         description: "View all data",
         tooltip: "description",

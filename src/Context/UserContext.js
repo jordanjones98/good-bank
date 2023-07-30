@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { FirebaseContext } from "./FirebaseContext";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { addHours, isBefore } from "date-fns";
@@ -15,37 +15,6 @@ export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState();
   const firebaseContext = useContext(FirebaseContext);
   const db = firebaseContext.db;
-
-  async function updateUser(user) {
-    try {
-      const userDoc = doc(db, "users", user.authUid);
-      await setDoc(userDoc, user);
-
-      setUser(user);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
-  }
-
-  const createUserSession = async (uid, token) => {
-    const expireAt = addHours(new Date(), SESSION_LENGTH_HOURS).toISOString();
-
-    localStorage.setItem(USER_TOKEN_NAME, token);
-    localStorage.setItem(EXPIRE_DATE_NAME, expireAt);
-
-    try {
-      const sessionDoc = doc(db, SESSION_COLLECTION_NAME, token);
-
-      await setDoc(sessionDoc, { uid, expireAt });
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
-  const isExpired = (expireDate) => {
-    return isBefore(new Date(expireDate), new Date());
-  };
 
   const getUserFromSession = async () => {
     const token = localStorage.getItem(USER_TOKEN_NAME);
@@ -81,6 +50,47 @@ export const UserContextProvider = ({ children }) => {
     const user = userDocSnap.data();
     setUser(user);
     return user;
+  };
+
+  useEffect(() => {
+    const getUser = async () => {
+      await getUserFromSession();
+    };
+
+    if (!user) {
+      getUser();
+    }
+  }, [user, getUserFromSession]);
+
+  async function updateUser(user) {
+    try {
+      const userDoc = doc(db, "users", user.authUid);
+      await setDoc(userDoc, user);
+
+      setUser(user);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  }
+
+  const createUserSession = async (uid, token) => {
+    const expireAt = addHours(new Date(), SESSION_LENGTH_HOURS).toISOString();
+
+    localStorage.setItem(USER_TOKEN_NAME, token);
+    localStorage.setItem(EXPIRE_DATE_NAME, expireAt);
+
+    try {
+      const sessionDoc = doc(db, SESSION_COLLECTION_NAME, token);
+
+      await setDoc(sessionDoc, { uid, expireAt });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const isExpired = (expireDate) => {
+    return isBefore(new Date(expireDate), new Date());
   };
 
   return (
