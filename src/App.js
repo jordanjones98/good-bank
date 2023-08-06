@@ -5,7 +5,6 @@ import Navbar from "./Components/navbar";
 import Home from "./Components/home";
 import CreateAccount from "./Components/createaccount";
 import Login from "./Components/login";
-import AllData from "./Components/alldata";
 import Deposit from "./Components/deposit";
 import Withdraw from "./Components/withdraw";
 import { UserContextProvider } from "./Context/UserContext";
