@@ -9,27 +9,24 @@ import AllData from "./Components/alldata";
 import Deposit from "./Components/deposit";
 import Withdraw from "./Components/withdraw";
 import { UserContextProvider } from "./Context/UserContext";
-import { FirebaseContextProvider } from "./Context/FirebaseContext";
 
 function App() {
   return (
-    <FirebaseContextProvider>
+    <Router>
       <UserContextProvider>
-        <Router>
-          <div className="App">
-            <Navbar />
-            <Routes>
-              <Route exact path="/" element={<Home />}></Route>
-              <Route path="/createaccount" element={<CreateAccount />}></Route>
-              <Route path="/login" element={<Login />}></Route>
-              <Route path="/deposit" element={<Deposit />}></Route>
-              <Route path="/withdraw" element={<Withdraw />}></Route>
-              <Route path="/alldata" element={<AllData />}></Route>
-            </Routes>
-          </div>
-        </Router>
+        <div className="App">
+          <Navbar />
+          <Routes>
+            <Route exact path="/" element={<Home />}></Route>
+            <Route path="/createaccount" element={<CreateAccount />}></Route>
+            <Route path="/login" element={<Login />}></Route>
+            <Route path="/deposit" element={<Deposit />}></Route>
+            <Route path="/withdraw" element={<Withdraw />}></Route>
+            <Route path="/alldata" element={<AllData />}></Route>
+          </Routes>
+        </div>
       </UserContextProvider>
-    </FirebaseContextProvider>
+    </Router>
   );
 }
 

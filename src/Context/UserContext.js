@@ -1,6 +1,5 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
-import { FirebaseContext } from "./FirebaseContext";
-import { doc, setDoc } from "firebase/firestore";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export var user = null;
 
@@ -9,25 +8,40 @@ export const UserContext = React.createContext();
 export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState();
   const [isLoading, setIsLoading] = useState(true);
-  const firebaseContext = useContext(FirebaseContext);
-  const db = firebaseContext.db;
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const tryToGetUser = useCallback(async () => {
+    const token = localStorage.getItem("token");
+
+    const navigateIfNeeded = () => {
+      const path = location.pathname;
+      const nonNavigateLinks = ["/login", "/createaccount"];
+
+      setIsLoading(false);
+
+      if (!nonNavigateLinks.includes(path)) {
+        navigate("/login");
+      }
+    };
+
+    if (user || !token) {
+      navigateIfNeeded();
+      return;
+    }
+
     const headers = new Headers();
-    headers.append("Authorization", localStorage.getItem("token"));
+    headers.append("Authorization", token);
 
     fetch("http://localhost:4000/me", { method: "GET", headers })
       .then(async (response) => {
         const data = await response.json();
         if (!data.error) {
           setUser(data);
-          return;
         }
-
-        throw new Error(data.errorMessage);
       })
       .finally(() => setIsLoading(false));
-  }, [setUser]);
+  }, [setUser, user, location, navigate]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -57,22 +71,12 @@ export const UserContextProvider = ({ children }) => {
       if (!data.error) {
         localStorage.setItem("token", data.token);
         setUser(data);
+        navigate("/deposit");
         return;
       }
 
       throw new Error(data.errorMessage);
     });
-  }
-
-  async function updateUser(user) {
-    try {
-      const userDoc = doc(db, "users", user.authUid);
-      await setDoc(userDoc, user);
-
-      setUser(user);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
   }
 
   async function withdraw(amount) {
@@ -119,7 +123,44 @@ export const UserContextProvider = ({ children }) => {
     });
   }
 
-  async function handleLogout() {}
+  async function handleLogout() {
+    const headers = new Headers();
+    headers.append("Authorization", localStorage.getItem("token"));
+
+    fetch("http://localhost:4000/logout", { method: "GET", headers }).then(
+      async (response) => {
+        setUser(null);
+        localStorage.removeItem("token");
+        return;
+      }
+    );
+  }
+
+  async function createAccount(name, email, password) {
+    const data = {
+      name,
+      email,
+      password,
+    };
+
+    fetch("http://localhost:4000/createaccount", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then(async (response) => {
+      const data = await response.json();
+
+      if (!data.error) {
+        localStorage.setItem("token", data.token);
+        setUser(data);
+        return;
+      }
+
+      throw new Error(data.errorMessage);
+    });
+  }
 
   return (
     <>
@@ -127,11 +168,11 @@ export const UserContextProvider = ({ children }) => {
         <UserContext.Provider
           value={{
             user,
-            updateUser,
             tryToLoginUser,
             handleLogout,
             withdraw,
             deposit,
+            createAccount,
           }}
         >
           {children}

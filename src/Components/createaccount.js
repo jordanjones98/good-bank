@@ -7,7 +7,6 @@ const CreateAccount = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const balance = 0;
   const [success, setSuccess] = useState(false);
   const userContext = useContext(UserContext);
 
@@ -34,18 +33,8 @@ const CreateAccount = () => {
     } else if (password.length < 8) {
       alert("Password must be at least 8 characters long.");
     } else {
-      const user = {
-        name,
-        email,
-        balance,
-      };
-
       try {
-        const authUser = await saveUserInStore(email, password);
-
-        user.authUid = authUser.uid;
-        userContext.createUserSession(authUser.accessToken);
-        userContext.updateUser(user);
+        userContext.createAccount(name, email, password);
       } catch (error) {
         setSuccess(false);
         console.log(error);
