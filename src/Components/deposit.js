@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
-import { format } from "date-fns";
 import TransactionTable from "./transactiontable";
 import { prettyNumber } from "../Utilities/prettyNumber";
 
@@ -19,12 +18,11 @@ const Deposit = () => {
   } else {
     /* eslint-disable */
     var [depositAmount, setDepositAmount] = useState("");
-    var [balance, setBalance] = useState(user.balance);
     var [successMessage, setSuccessMessage] = useState("");
     var [errorMessage, setErrorMessage] = useState("");
     /* eslint-enable */
 
-    const handleDeposit = () => {
+    const handleDeposit = async () => {
       setErrorMessage("");
       setSuccessMessage("");
       if (depositAmount === "") {
@@ -38,25 +36,9 @@ const Deposit = () => {
         return;
       }
 
-      const amount = parseFloat(depositAmount);
-      const parsedBalance = parseFloat(balance);
-      const newBalance = parseFloat(parsedBalance + amount).toFixed(2);
+      const amount = parseFloat(depositAmount).toFixed(2);
 
-      setBalance(newBalance);
-
-      user.balance = newBalance;
-
-      if (!user.deposits) {
-        user.deposits = [];
-      }
-
-      user.deposits.push({
-        date: format(new Date(), "MM/dd/yyyy 'at' h:mm a"),
-        amount: amount.toFixed(2),
-        balance: newBalance,
-      });
-
-      userContext.updateUser(user);
+      await userContext.deposit(amount);
 
       setSuccessMessage(`Deposit of $${prettyNumber(amount)} was successful`);
       setDepositAmount("");
@@ -91,7 +73,7 @@ const Deposit = () => {
                       type="text"
                       className="form-control"
                       id="balance"
-                      value={`$${prettyNumber(balance)}`}
+                      value={`$${prettyNumber(user.balance)}`}
                       readOnly
                     />
                   </div>

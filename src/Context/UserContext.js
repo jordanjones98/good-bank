@@ -1,13 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
 import { FirebaseContext } from "./FirebaseContext";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import {
-  getAuth,
-  signOut,
-  signInWithEmailAndPassword,
-  setPersistence,
-  browserSessionPersistence,
-} from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 export var user = null;
 
@@ -18,36 +11,23 @@ export const UserContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const firebaseContext = useContext(FirebaseContext);
   const db = firebaseContext.db;
-  const auth = getAuth();
 
   const tryToGetUser = useCallback(async () => {
-    try {
-      console.log(auth);
-      const authUser = auth.currentUser;
-      console.log(authUser);
-      if (authUser) {
-        const userDocRef = doc(db, "users", authUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
+    const headers = new Headers();
+    headers.append("Authorization", localStorage.getItem("token"));
 
-        if (!userDocSnap.exists()) {
-          console.log("user not found");
-          return false;
+    fetch("http://localhost:4000/me", { method: "GET", headers })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!data.error) {
+          setUser(data);
+          return;
         }
 
-        const user = userDocSnap.data();
-        setUser(user);
-        return user;
-      }
-
-      console.log("No logged in user found");
-
-      return null;
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setUser, db, auth]);
+        throw new Error(data.errorMessage);
+      })
+      .finally(() => setIsLoading(false));
+  }, [setUser]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -71,16 +51,17 @@ export const UserContextProvider = ({ children }) => {
       headers: {
         "Content-Type": "application/json",
       },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (!data.error) {
-          setUser(data);
-          return;
-        }
+    }).then(async (response) => {
+      const data = await response.json();
 
-        throw new Error(data.errorMessage);
-      });
+      if (!data.error) {
+        localStorage.setItem("token", data.token);
+        setUser(data);
+        return;
+      }
+
+      throw new Error(data.errorMessage);
+    });
   }
 
   async function updateUser(user) {
@@ -94,6 +75,50 @@ export const UserContextProvider = ({ children }) => {
     }
   }
 
+  async function withdraw(amount) {
+    const headers = new Headers();
+    headers.append("Authorization", localStorage.getItem("token"));
+    headers.append("Content-Type", "application/json");
+
+    const data = { amount: amount };
+
+    fetch("http://localhost:4000/withdraw", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(data),
+    }).then(async (response) => {
+      const data = await response.json();
+      if (!data.error) {
+        setUser(data);
+        return;
+      }
+
+      throw new Error(data.errorMessage);
+    });
+  }
+
+  async function deposit(amount) {
+    const headers = new Headers();
+    headers.append("Authorization", localStorage.getItem("token"));
+    headers.append("Content-Type", "application/json");
+
+    const data = { amount: amount };
+
+    fetch("http://localhost:4000/deposit", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(data),
+    }).then(async (response) => {
+      const data = await response.json();
+      if (!data.error) {
+        setUser(data);
+        return;
+      }
+
+      throw new Error(data.errorMessage);
+    });
+  }
+
   async function handleLogout() {}
 
   return (
@@ -105,6 +130,8 @@ export const UserContextProvider = ({ children }) => {
             updateUser,
             tryToLoginUser,
             handleLogout,
+            withdraw,
+            deposit,
           }}
         >
           {children}

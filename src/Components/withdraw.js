@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import Structure from "./structure";
 import { UserContext } from "../Context/UserContext";
-import { format } from "date-fns";
 import TransactionTable from "./transactiontable";
 import { prettyNumber } from "../Utilities/prettyNumber";
 
@@ -19,12 +18,11 @@ const Withdraw = () => {
   } else {
     /* eslint-disable */
     const [withdrawAmount, setWithdrawAmount] = useState("");
-    var [balance, setBalance] = useState(user.balance);
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     /* eslint-enable */
 
-    const handleWithdraw = () => {
+    const handleWithdraw = async () => {
       setErrorMessage("");
       setSuccessMessage("");
 
@@ -34,27 +32,15 @@ const Withdraw = () => {
       } else if (isNaN(withdrawAmount)) {
         setErrorMessage("Enter valid number");
         return;
-      } else if (parseFloat(withdrawAmount) > balance) {
+      } else if (parseFloat(withdrawAmount) > user.balance) {
         setErrorMessage("Withdrawal exceeds current balance");
         return;
       }
 
       const amount = parseFloat(withdrawAmount).toFixed(2);
-      const newBalance = parseFloat(balance - amount).toFixed(2);
-      setBalance(newBalance);
-      user.balance = newBalance;
 
-      if (!user.withdraws) {
-        user.withdraws = [];
-      }
+      await userContext.withdraw(amount);
 
-      user.withdraws.push({
-        date: format(new Date(), "MM/dd/yyyy 'at' h:mm a"),
-        amount,
-        balance: newBalance,
-      });
-
-      userContext.updateUser(user);
       setSuccessMessage(
         `Withdrawal of $${prettyNumber(amount)} processed successfully.`
       );
@@ -90,7 +76,7 @@ const Withdraw = () => {
                       type="text"
                       className="form-control"
                       id="balance"
-                      value={`$${prettyNumber(balance)}`}
+                      value={`$${prettyNumber(user.balance)}`}
                       readOnly
                     />
                   </div>
