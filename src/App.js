@@ -22,7 +22,6 @@ function App() {
             <Route path="/login" element={<Login />}></Route>
             <Route path="/deposit" element={<Deposit />}></Route>
             <Route path="/withdraw" element={<Withdraw />}></Route>
-            <Route path="/alldata" element={<AllData />}></Route>
           </Routes>
         </div>
       </UserContextProvider>
