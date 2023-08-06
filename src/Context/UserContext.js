@@ -1,68 +1,87 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
 import { FirebaseContext } from "./FirebaseContext";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { addHours, isBefore } from "date-fns";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  getAuth,
+  signOut,
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 
 export var user = null;
 
 export const UserContext = React.createContext();
-const USER_TOKEN_NAME = "user-token";
-const EXPIRE_DATE_NAME = "expire-date";
-const SESSION_COLLECTION_NAME = "sessions";
-const SESSION_LENGTH_HOURS = 6;
 
 export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const firebaseContext = useContext(FirebaseContext);
   const db = firebaseContext.db;
+  const auth = getAuth();
 
-  const getUserFromSession = useCallback(async () => {
-    const token = localStorage.getItem(USER_TOKEN_NAME);
-    const expire = localStorage.getItem(EXPIRE_DATE_NAME);
+  const tryToGetUser = useCallback(async () => {
+    try {
+      console.log(auth);
+      const authUser = auth.currentUser;
+      console.log(authUser);
+      if (authUser) {
+        const userDocRef = doc(db, "users", authUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
 
-    if (expire && isExpired(expire)) {
-      console.log("Token Expired");
-      return false;
+        if (!userDocSnap.exists()) {
+          console.log("user not found");
+          return false;
+        }
+
+        const user = userDocSnap.data();
+        setUser(user);
+        return user;
+      }
+
+      console.log("No logged in user found");
+
+      return null;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    const sessionDocRef = doc(db, SESSION_COLLECTION_NAME, token);
-    const sessionDocSnap = await getDoc(sessionDocRef);
-
-    if (!sessionDocSnap.exists()) {
-      console.log("Token not found");
-      return false;
-    }
-
-    const data = sessionDocSnap.data();
-
-    if (isExpired(data.expireAt)) {
-      return false;
-    }
-
-    const userDocRef = doc(db, "users", data.uid);
-    const userDocSnap = await getDoc(userDocRef);
-
-    if (!userDocSnap.exists()) {
-      console.log("user not found");
-      return false;
-    }
-
-    const user = userDocSnap.data();
-    setUser(user);
-    setIsLoading(false);
-    return user;
-  }, [db]);
+  }, [setUser, db, auth]);
 
   useEffect(() => {
     const getUser = async () => {
-      await getUserFromSession();
+      await tryToGetUser();
     };
 
     if (!user) {
       getUser();
     }
-  }, [user, getUserFromSession]);
+  }, [user, tryToGetUser]);
+
+  async function tryToLoginUser(email, password) {
+    const data = {
+      email,
+      password,
+    };
+
+    fetch("http://localhost:4000/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.error) {
+          setUser(data);
+          return;
+        }
+
+        throw new Error(data.errorMessage);
+      });
+  }
 
   async function updateUser(user) {
     try {
@@ -75,31 +94,18 @@ export const UserContextProvider = ({ children }) => {
     }
   }
 
-  const createUserSession = async (uid, token) => {
-    const expireAt = addHours(new Date(), SESSION_LENGTH_HOURS).toISOString();
-
-    localStorage.setItem(USER_TOKEN_NAME, token);
-    localStorage.setItem(EXPIRE_DATE_NAME, expireAt);
-
-    try {
-      const sessionDoc = doc(db, SESSION_COLLECTION_NAME, token);
-
-      await setDoc(sessionDoc, { uid, expireAt });
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
-  const isExpired = (expireDate) => {
-    return isBefore(new Date(expireDate), new Date());
-  };
+  async function handleLogout() {}
 
   return (
     <>
       {!isLoading ? (
         <UserContext.Provider
-          value={{ user, updateUser, getUserFromSession, createUserSession }}
+          value={{
+            user,
+            updateUser,
+            tryToLoginUser,
+            handleLogout,
+          }}
         >
           {children}
         </UserContext.Provider>
@@ -111,7 +117,7 @@ export const UserContextProvider = ({ children }) => {
             </div>
             <div className="row mt-2">
               <div className="text-center">
-                <div class="spinner-border" role="status"></div>
+                <div className="spinner-border" role="status"></div>
               </div>
             </div>
           </div>

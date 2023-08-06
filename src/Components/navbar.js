@@ -86,7 +86,20 @@ function NavBar() {
             })}
           </ul>
           <ul className="navbar-nav ms-auto">
-            {user && <span className="navbar-text">{user.name}</span>}
+            {user && (
+              <>
+                <span className="navbar-text">{user.name}</span>
+                <li className="nav-item ms-auto">
+                  <NavLink
+                    className="nav-link"
+                    data-description="Logout"
+                    onClick={userContext.handleLogout}
+                  >
+                    Logout
+                  </NavLink>
+                </li>
+              </>
+            )}
             {!user && (
               <>
                 <li className="nav-item ms-auto">
