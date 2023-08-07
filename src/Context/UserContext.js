@@ -155,6 +155,7 @@ export const UserContextProvider = ({ children }) => {
       if (!data.error) {
         localStorage.setItem("token", data.token);
         setUser(data);
+        navigate("/deposit");
         return;
       }
 
