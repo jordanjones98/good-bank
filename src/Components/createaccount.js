@@ -106,7 +106,6 @@ const CreateAccount = () => {
                     </button>
                   </form>
                 </>
-                )}
               </div>
             </div>
           </div>

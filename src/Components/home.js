@@ -10,11 +10,9 @@ const Home = () => {
           <div className="col-md-6">
             <div className="card">
               <div className="card-body text-center">
-                <h4 className="card-header">Welcome to the Bad Bank!</h4>
+                <h4 className="card-header">Welcome to the Good Bank!</h4>
                 <div className="card-body">
-                  <h6 className="card-text">
-                    This is a Bad Bank because it is NOT SECURE!
-                  </h6>
+                  <h6 className="card-text">Capstone Project for MITxPro</h6>
                 </div>
                 <img
                   src={logo}

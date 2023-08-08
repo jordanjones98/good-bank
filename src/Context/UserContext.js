@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { applicationConfig } from "../config.local.js";
 
 export var user = null;
 
@@ -10,6 +11,7 @@ export const UserContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const apiUrl = applicationConfig.apiUrl;
 
   const tryToGetUser = useCallback(async () => {
     const token = localStorage.getItem("token");
@@ -33,7 +35,7 @@ export const UserContextProvider = ({ children }) => {
     const headers = new Headers();
     headers.append("Authorization", token);
 
-    fetch("http://localhost:4000/me", { method: "GET", headers })
+    fetch(`${apiUrl}/me`, { method: "GET", headers })
       .then(async (response) => {
         const data = await response.json();
         if (!data.error) {
@@ -41,7 +43,7 @@ export const UserContextProvider = ({ children }) => {
         }
       })
       .finally(() => setIsLoading(false));
-  }, [setUser, user, location, navigate]);
+  }, [setUser, user, location, navigate, apiUrl]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -59,7 +61,7 @@ export const UserContextProvider = ({ children }) => {
       password,
     };
 
-    fetch("http://localhost:4000/login", {
+    fetch(`${apiUrl}/login`, {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
@@ -86,7 +88,7 @@ export const UserContextProvider = ({ children }) => {
 
     const data = { amount: amount };
 
-    fetch("http://localhost:4000/withdraw", {
+    fetch(`${apiUrl}/withdraw`, {
       method: "POST",
       headers,
       body: JSON.stringify(data),
@@ -108,7 +110,7 @@ export const UserContextProvider = ({ children }) => {
 
     const data = { amount: amount };
 
-    fetch("http://localhost:4000/deposit", {
+    fetch(`${apiUrl}/deposit`, {
       method: "POST",
       headers,
       body: JSON.stringify(data),
@@ -127,7 +129,7 @@ export const UserContextProvider = ({ children }) => {
     const headers = new Headers();
     headers.append("Authorization", localStorage.getItem("token"));
 
-    fetch("http://localhost:4000/logout", { method: "GET", headers }).then(
+    fetch(`${apiUrl}/logout`, { method: "GET", headers }).then(
       async (response) => {
         setUser(null);
         localStorage.removeItem("token");
@@ -143,7 +145,7 @@ export const UserContextProvider = ({ children }) => {
       password,
     };
 
-    fetch("http://localhost:4000/createaccount", {
+    fetch(`${apiUrl}/createaccount`, {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
