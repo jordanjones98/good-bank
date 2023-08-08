@@ -5,6 +5,7 @@ import { UserContext } from "../Context/UserContext";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const userContext = useContext(UserContext);
 
   const handleEmailChange = (event) => {
@@ -22,12 +23,8 @@ const Login = () => {
     } else if (!password) {
       alert("Please enter your password.");
     } else {
-      try {
-        userContext.tryToLoginUser(email, password);
-      } catch (error) {
-        console.log(error);
-        alert(error.message);
-      }
+      const errorMessage = await userContext.tryToLoginUser(email, password);
+      setErrorMessage(errorMessage);
     }
   };
 
@@ -45,6 +42,9 @@ const Login = () => {
                   >
                     Login
                   </h4>
+                  {errorMessage && (
+                    <div className="alert alert-danger">{errorMessage}</div>
+                  )}
                   <form onSubmit={handleSubmit}>
                     <div className="form-group mt-2">
                       <label htmlFor="emailInput">Email</label>

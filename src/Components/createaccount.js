@@ -6,6 +6,7 @@ const CreateAccount = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const userContext = useContext(UserContext);
 
   const handleNameChange = (event) => {
@@ -31,12 +32,12 @@ const CreateAccount = () => {
     } else if (password.length < 8) {
       alert("Password must be at least 8 characters long.");
     } else {
-      try {
-        userContext.createAccount(name, email, password);
-      } catch (error) {
-        console.log(error);
-        alert("Error creating account");
-      }
+      const errorMessage = await userContext.createAccount(
+        name,
+        email,
+        password
+      );
+      setErrorMessage(errorMessage);
     }
   };
 
@@ -54,6 +55,9 @@ const CreateAccount = () => {
                   >
                     Create Account
                   </h4>
+                  {errorMessage && (
+                    <div className="alert alert-danger">{errorMessage}</div>
+                  )}
                   <form onSubmit={handleSubmit}>
                     <div className="form-group">
                       <label htmlFor="nameInput">Name</label>
