@@ -61,23 +61,23 @@ export const UserContextProvider = ({ children }) => {
       password,
     };
 
-    const response = await fetch(`${apiUrl}/login`, {
+    fetch(`${apiUrl}/login`, {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
       },
+    }).then(async (response) => {
+      const data = await response.json();
+      if (!data.error) {
+        localStorage.setItem("token", data.token);
+        setUser(data);
+        navigate("/deposit");
+        return;
+      } else {
+        return data.errorMessage;
+      }
     });
-    const json = await response.json();
-
-    if (!json.error) {
-      localStorage.setItem("token", json.token);
-      setUser(data);
-      navigate("/deposit");
-      return;
-    } else {
-      return "Error logging in user";
-    }
   }
 
   async function withdraw(amount) {
@@ -144,23 +144,24 @@ export const UserContextProvider = ({ children }) => {
       password,
     };
 
-    const response = await fetch(`${apiUrl}/createaccount`, {
+    fetch(`${apiUrl}/createaccount`, {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
       },
+    }).then(async (response) => {
+      const data = await response.json();
+
+      if (!data.error) {
+        localStorage.setItem("token", data.token);
+        setUser(data);
+        navigate("/deposit");
+        return;
+      }
+
+      throw new Error(data.errorMessage);
     });
-    const json = await response.json();
-
-    if (!json.error) {
-      localStorage.setItem("token", json.token);
-      setUser(json);
-      navigate("/deposit");
-      return;
-    }
-
-    return "Error creating user account";
   }
 
   return (
